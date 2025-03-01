@@ -50,7 +50,7 @@ interface SidebarContentStore {
 }
 
 // Default values
-const defaultData = {
+export const defaultData = {
   user: {
     name: "shadcn",
     email: "m@example.com",

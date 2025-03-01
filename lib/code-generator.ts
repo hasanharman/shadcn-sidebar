@@ -1,5 +1,6 @@
 // lib/code-generator.ts
 import { BuilderStore } from "@/store/use-builder-store";
+import { useSidebarContentStore } from "@/store/use-content-store";
 
 export type CodeFile = {
   name: string;
@@ -7,42 +8,45 @@ export type CodeFile = {
   content: string;
 };
 
-export function generateSidebarCode(settings: BuilderStore): CodeFile[] {
+export function generateSidebarCode(
+  settings: BuilderStore,
+  content = useSidebarContentStore.getState()
+): CodeFile[] {
   const files: CodeFile[] = [];
 
   // Generate app-sidebar.tsx
   files.push({
     name: "app-sidebar.tsx",
     path: "components/app-sidebar.tsx",
-    content: generateAppSidebarCode(settings),
+    content: generateAppSidebarCode(settings, content),
   });
 
   // Generate nav-main.tsx
   files.push({
     name: "nav-main.tsx",
     path: "components/nav-main.tsx",
-    content: generateNavMainCode(settings),
+    content: generateNavMainCode(settings, content),
   });
 
   // Generate nav-projects.tsx
   files.push({
     name: "nav-projects.tsx",
     path: "components/nav-projects.tsx",
-    content: generateNavProjectsCode(settings),
+    content: generateNavProjectsCode(settings, content),
   });
 
   // Generate nav-user.tsx
   files.push({
     name: "nav-user.tsx",
     path: "components/nav-user.tsx",
-    content: generateNavUserCode(settings),
+    content: generateNavUserCode(settings, content),
   });
 
   // Generate team-switcher.tsx
   files.push({
     name: "team-switcher.tsx",
     path: "components/team-switcher.tsx",
-    content: generateTeamSwitcherCode(settings),
+    content: generateTeamSwitcherCode(settings, content),
   });
 
   // Generate sidebar CSS variables
@@ -63,30 +67,32 @@ export function generateSidebarCode(settings: BuilderStore): CodeFile[] {
   files.push({
     name: "README.md",
     path: "README.md",
-    content: generateReadmeCode(settings),
+    content: generateReadmeCode(settings, content),
   });
 
   return files;
 }
 
+// Helper to generate icon imports
+function generateIconImports(iconNames: string[]): string {
+  const uniqueIcons = [...new Set(iconNames)].filter(Boolean);
+  return uniqueIcons.length > 0
+    ? `import {\n  ${uniqueIcons.join(",\n  ")},\n} from "lucide-react";`
+    : "";
+}
+
 // Helper functions to generate each file's content
-function generateAppSidebarCode(settings: BuilderStore): string {
-  // Generate code based on settings
+function generateAppSidebarCode(settings: BuilderStore, content: any): string {
+  // Collect all icon names from the content
+  const teamIcons = content.teams.map((team: any) => team.iconName);
+  const navIcons = content.navMain.map((item: any) => item.iconName);
+  const projectIcons = content.projects.map((project: any) => project.iconName);
+  const allIcons = [...teamIcons, ...navIcons, ...projectIcons];
+
   return `"use client";
 
 import type * as React from "react";
-import {
-  AudioWaveform,
-  BookOpen,
-  Bot,
-  Command,
-  Frame,
-  GalleryVerticalEnd,
-  Map,
-  PieChart,
-  Settings2,
-  SquareTerminal,
-} from "lucide-react";
+${generateIconImports(allIcons)}
 
 import { NavMain } from "./nav-main";
 import { NavProjects } from "./nav-projects";
@@ -99,136 +105,6 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
-
-// This is sample data.
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  teams: [
-    {
-      name: "Acme Inc",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
-    },
-  ],
-  navMain: [
-    {
-      title: "Playground",
-      url: "#",
-      icon: SquareTerminal,
-      isActive: true,
-      items: [
-        {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Models",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
-  ],
-};
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   // You can add additional props here if needed
@@ -246,13 +122,12 @@ export function AppSidebar({ ...props }: AppSidebarProps) {
       ${
         settings.showHeader
           ? `<SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        <TeamSwitcher />
       </SidebarHeader>`
           : ""
       }
       <SidebarContent>
         <NavMain 
-          items={data.navMain} 
           ${settings.showIcons ? "showIcons={true}" : "showIcons={false}"} 
           ${
             settings.showSectionLabels
@@ -262,7 +137,6 @@ export function AppSidebar({ ...props }: AppSidebarProps) {
           buttonSize="${settings.menuButtonSize}"
         />
         <NavProjects 
-          projects={data.projects} 
           ${settings.showIcons ? "showIcons={true}" : "showIcons={false}"}
           ${
             settings.showSectionLabels
@@ -275,7 +149,7 @@ export function AppSidebar({ ...props }: AppSidebarProps) {
       ${
         settings.showFooter
           ? `<SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser />
       </SidebarFooter>`
           : ""
       }
@@ -285,10 +159,19 @@ export function AppSidebar({ ...props }: AppSidebarProps) {
 }`;
 }
 
-function generateNavMainCode(settings: BuilderStore): string {
+function generateNavMainCode(settings: BuilderStore, content: any): string {
+  // Extract all the icon names from nav items
+  const iconNames = content.navMain.map((item: any) => item.iconName);
+
+  // Generate the items array as a string
+  const itemsArray = JSON.stringify(content.navMain, null, 2)
+    .replace(/"iconName":\s*"([^"]+)"/g, "icon: $1")
+    .replace(/"([^"]+)":/g, "$1:");
+
   return `"use client"
 
-import { ChevronRight, type LucideIcon } from "lucide-react"
+import { ChevronRight } from "lucide-react"
+${generateIconImports(iconNames)}
 
 import {
   Collapsible,
@@ -307,27 +190,19 @@ import {
 } from "@/components/ui/sidebar"
 
 interface NavMainProps {
-  items: {
-    title: string
-    url: string
-    icon?: LucideIcon
-    isActive?: boolean
-    items?: {
-      title: string
-      url: string
-    }[]
-  }[]
   showIcons?: boolean
   showSectionLabels?: boolean
   buttonSize?: "default" | "sm" | "lg"
 }
 
 export function NavMain({ 
-  items, 
   showIcons = ${settings.showIcons}, 
   showSectionLabels = ${settings.showSectionLabels},
   buttonSize = "${settings.menuButtonSize}"
 }: NavMainProps) {
+  // Navigation items
+  const items = ${itemsArray};
+
   return (
     <SidebarGroup>
       {showSectionLabels && <SidebarGroupLabel>Platform</SidebarGroupLabel>}
@@ -369,7 +244,18 @@ export function NavMain({
 }`;
 }
 
-function generateNavProjectsCode(settings: BuilderStore): string {
+function generateNavProjectsCode(settings: BuilderStore, content: any): string {
+  // Extract all the icon names from projects
+  const iconNames = content.projects.map((project: any) => project.iconName);
+
+  // Add the standard icons used in the dropdown menu
+  iconNames.push("Folder", "Forward", "MoreHorizontal", "Trash2");
+
+  // Generate the projects array as a string
+  const projectsArray = JSON.stringify(content.projects, null, 2)
+    .replace(/"iconName":\s*"([^"]+)"/g, "icon: $1")
+    .replace(/"([^"]+)":/g, "$1:");
+
   return `"use client"
 
 import {
@@ -377,7 +263,12 @@ import {
   Forward,
   MoreHorizontal,
   Trash2,
-  type LucideIcon,
+  ${iconNames
+    .filter(
+      (icon:string) =>
+        !["Folder", "Forward", "MoreHorizontal", "Trash2"].includes(icon)
+    )
+    .join(",\n  ")}
 } from "lucide-react"
 
 import {
@@ -398,23 +289,20 @@ import {
 } from "@/components/ui/sidebar"
 
 interface NavProjectsProps {
-  projects: {
-    name: string
-    url: string
-    icon: LucideIcon
-  }[]
   showIcons?: boolean
   showSectionLabels?: boolean
   buttonSize?: "default" | "sm" | "lg"
 }
 
 export function NavProjects({ 
-  projects, 
   showIcons = ${settings.showIcons},
   showSectionLabels = ${settings.showSectionLabels},
   buttonSize = "${settings.menuButtonSize}"
 }: NavProjectsProps) {
   const { isMobile } = useSidebar()
+  
+  // Projects data
+  const projects = ${projectsArray};
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
@@ -469,7 +357,9 @@ export function NavProjects({
 }`;
 }
 
-function generateNavUserCode(settings: BuilderStore): string {
+function generateNavUserCode(settings: BuilderStore, content: any): string {
+  const user = content.user;
+
   return `"use client"
 
 import {
@@ -502,16 +392,15 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
-interface NavUserProps {
-  user: {
-    name: string
-    email: string
-    avatar: string
-  }
-}
-
-export function NavUser({ user }: NavUserProps) {
+export function NavUser() {
   const { isMobile } = useSidebar()
+  
+  // User data
+  const user = {
+    name: "${user.name}",
+    email: "${user.email}",
+    avatar: "${user.avatar}"
+  };
 
   return (
     <SidebarMenu>
@@ -524,7 +413,9 @@ export function NavUser({ user }: NavUserProps) {
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarFallback className="rounded-lg">${user.name
+                  .substring(0, 2)
+                  .toUpperCase()}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
@@ -543,7 +434,9 @@ export function NavUser({ user }: NavUserProps) {
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarFallback className="rounded-lg">${user.name
+                    .substring(0, 2)
+                    .toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>
@@ -586,11 +479,39 @@ export function NavUser({ user }: NavUserProps) {
 }`;
 }
 
-function generateTeamSwitcherCode(settings: BuilderStore): string {
+function generateTeamSwitcherCode(
+  settings: BuilderStore,
+  content: any
+): string {
+  // Extract all the icon names from teams
+  const iconNames = content.teams.map((team: any) => team.iconName);
+
+  // Add the Plus icon which is used in the UI
+  iconNames.push("Plus", "ChevronsUpDown");
+
+  // Generate teams array with proper icon references
+  const teamsData = content.teams.map((team: any) => {
+    return {
+      name: team.name,
+      iconName: team.iconName,
+      plan: team.plan,
+    };
+  });
+
+  const teamsString = JSON.stringify(teamsData, null, 2)
+    .replace(/"iconName":\s*"([^"]+)"/g, "icon: $1")
+    .replace(/"([^"]+)":/g, "$1:");
+
   return `"use client"
 
 import * as React from "react"
-import { ChevronsUpDown, Plus } from "lucide-react"
+import {
+  ChevronsUpDown,
+  Plus,
+  ${iconNames
+    .filter((icon: string) => !["Plus", "ChevronsUpDown"].includes(icon))
+    .join(",\n  ")}
+} from "lucide-react"
 
 import {
   DropdownMenu,
@@ -608,16 +529,12 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
-interface TeamSwitcherProps {
-  teams: {
-    name: string
-    logo: React.ElementType
-    plan: string
-  }[]
-}
-
-export function TeamSwitcher({ teams }: TeamSwitcherProps) {
+export function TeamSwitcher() {
   const { isMobile } = useSidebar()
+  
+  // Teams data
+  const teams = ${teamsString};
+  
   const [activeTeam, setActiveTeam] = React.useState(teams[0])
 
   return (
@@ -630,7 +547,7 @@ export function TeamSwitcher({ teams }: TeamSwitcherProps) {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                <activeTeam.logo className="size-4" />
+                <activeTeam.icon className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{activeTeam.name}</span>
@@ -655,7 +572,7 @@ export function TeamSwitcher({ teams }: TeamSwitcherProps) {
                 className="gap-2 p-2"
               >
                 <div className="flex size-6 items-center justify-center rounded-xs border">
-                  <team.logo className="size-4 shrink-0" />
+                  <team.icon className="size-4 shrink-0" />
                 </div>
                 {team.name}
                 <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
@@ -720,7 +637,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 }`;
 }
 
-function generateReadmeCode(settings: BuilderStore): string {
+function generateReadmeCode(settings: BuilderStore, content: any): string {
   return `# Custom Sidebar Component
 
 This package contains a customized sidebar component built with shadcn/ui.
@@ -752,6 +669,15 @@ The sidebar has been configured with the following settings:
 - Show Icons: ${settings.showIcons}
 - Show Section Labels: ${settings.showSectionLabels}
 - Menu Button Size: ${settings.menuButtonSize}
+
+## Content
+
+The sidebar includes the following content:
+
+- User: ${content.user.name} (${content.user.email})
+- Teams: ${content.teams.map((t: any) => t.name).join(", ")}
+- Navigation Items: ${content.navMain.map((n: any) => n.title).join(", ")}
+- Projects: ${content.projects.map((p: any) => p.name).join(", ")}
 
 ## Usage
 
@@ -790,7 +716,7 @@ You can customize the sidebar further by modifying the component files directly.
 ## Components
 
 - \`app-sidebar.tsx\`: The main sidebar component that brings everything together
-- \`nav-main.tsx\`: The main navigation menu
+- \`nav-main.tsx\`: The main navigation menu with collapsible items
 - \`nav-projects.tsx\`: The projects navigation menu
 - \`nav-user.tsx\`: The user profile component
 - \`team-switcher.tsx\`: The team switcher component

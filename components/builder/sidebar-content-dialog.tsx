@@ -8,17 +8,17 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Plus, Trash2 } from "lucide-react";
+import { Settings, Plus, Trash2, RefreshCw } from "lucide-react";
 import { useSidebarContentStore } from "@/store/use-content-store";
-import * as Icons from "lucide-react";
 
-// Type for icon names
-type IconName = keyof typeof Icons;
+import { defaultData } from "@/store/use-content-store";
+import { SquarePenIcon } from "@/components/icons/square-pen";
 
 export function SidebarContentDialog() {
   const {
@@ -39,9 +39,13 @@ export function SidebarContentDialog() {
     setMounted(true);
   }, []);
 
-  const renderIcon = (name: IconName) => {
-    const Icon = Icons[name] as Icons.LucideIcon;
-    return <Icon className="mr-2 h-4 w-4" />;
+  const handleResetAll = () => {
+    if (defaultData) {
+      setUser(defaultData.user);
+      setTeams(defaultData.teams);
+      setNavMain(defaultData.navMain);
+      setProjects(defaultData.projects);
+    }
   };
 
   if (!mounted) {
@@ -51,9 +55,8 @@ export function SidebarContentDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Settings className="mr-2 h-4 w-4" />
-          Edit Sidebar Content
+        <Button variant="outline" size="icon">
+          <SquarePenIcon className="h-4 w-4" />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-scroll flex flex-col">
@@ -231,7 +234,8 @@ export function SidebarContentDialog() {
                             if (!newNav[index].items) {
                               newNav[index].items = [];
                             }
-                            newNav[index].items[itemIndex].title = e.target.value;
+                            newNav[index].items[itemIndex].title =
+                              e.target.value;
                             setNavMain(newNav);
                           }}
                           placeholder="Title"
@@ -372,6 +376,13 @@ export function SidebarContentDialog() {
             </TabsContent>
           </div>
         </Tabs>
+        <DialogFooter className="mt-4 pt-4 border-t">
+          <Button variant="outline" onClick={handleResetAll} className="gap-2">
+            <RefreshCw className="h-4 w-4" />
+            Reset to Default
+          </Button>
+          {/* <Button onClick={() => setDialogOpen(false)}>Done</Button> */}
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
