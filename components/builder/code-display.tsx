@@ -2,14 +2,15 @@
 "use client";
 
 import React, { useState } from "react";
-import { CodeFile } from "@/lib/code-generator";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Copy, Download, FileCode, Folder } from "lucide-react";
-import { toast } from "sonner";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { toast } from "sonner";
+
+import { CodeFile } from "@/lib/code-generator";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+import { Copy, Download, FileCode, Folder } from "lucide-react";
 
 interface CodeDisplayProps {
   files: CodeFile[];
@@ -73,9 +74,9 @@ export function CodeDisplay({ files }: CodeDisplayProps) {
         </div>
       </div>
 
-      <div className="flex flex-1 min-h-0">
-        {/* File Explorer */}
-        <div className="w-64 border-r p-2 overflow-auto">
+      <div className="flex flex-1 min-h-0 overflow-hidden">
+        {/* File Explorer - Use ScrollArea instead of overflow-scroll */}
+        <ScrollArea className="w-64 border-r p-2">
           {Object.entries(filesByDirectory).map(([directory, dirFiles]) => (
             <div key={directory} className="mb-4">
               <div className="flex items-center text-sm font-medium mb-1 text-muted-foreground">
@@ -105,10 +106,10 @@ export function CodeDisplay({ files }: CodeDisplayProps) {
               </ul>
             </div>
           ))}
-        </div>
+        </ScrollArea>
 
         {/* Code Content */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           {currentFile && (
             <>
               <div className="p-2 border-b text-sm font-mono flex items-center justify-between">
@@ -121,20 +122,22 @@ export function CodeDisplay({ files }: CodeDisplayProps) {
                   <Copy className="h-3.5 w-3.5" />
                 </Button>
               </div>
-              <ScrollArea className="flex-1">
-                <SyntaxHighlighter
-                  language={getLanguage(currentFile.name)}
-                  style={vscDarkPlus}
-                  customStyle={{
-                    margin: 0,
-                    borderRadius: 0,
-                    minHeight: "100%",
-                  }}
-                  showLineNumbers
-                >
-                  {currentFile.content}
-                </SyntaxHighlighter>
-              </ScrollArea>
+              <div className="flex-1 overflow-hidden">
+                <ScrollArea className="h-full w-full">
+                  <SyntaxHighlighter
+                    language={getLanguage(currentFile.name)}
+                    style={vscDarkPlus}
+                    customStyle={{
+                      margin: 0,
+                      borderRadius: 0,
+                      minHeight: "100%",
+                    }}
+                    showLineNumbers
+                  >
+                    {currentFile.content}
+                  </SyntaxHighlighter>
+                </ScrollArea>
+              </div>
             </>
           )}
         </div>
