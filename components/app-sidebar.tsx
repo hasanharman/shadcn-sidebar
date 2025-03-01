@@ -2,6 +2,7 @@
 "use client";
 
 import type * as React from "react";
+import { useEffect, useState } from "react";
 import {
   AudioWaveform,
   BookOpen,
@@ -24,6 +25,7 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  SidebarProvider,
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { useBuilderStore } from "@/store/use-builder-store";
@@ -159,13 +161,68 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const [isMounted, setIsMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const {
+    // Layout Settings
     sidebarPosition,
     sidebarVariant,
+    sidebarWidth,
+    sidebarMobileWidth,
+    // Behavior Settings
     collapseBehavior,
+    defaultOpen, // We'll remove this from sidebarProps
+    enableKeyboardShortcuts,
+
+    // Structure Settings
     showHeader,
     showFooter,
+    showIcons,
+    showSectionLabels,
+
+    // Style Settings
+    menuButtonSize,
   } = useBuilderStore();
+
+  // Check if we're on mobile
+  useEffect(() => {
+    setIsMounted(true);
+
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768); // Adjust breakpoint as needed
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // Setup keyboard shortcuts
+  useEffect(() => {
+    if (!enableKeyboardShortcuts) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check for Cmd/Ctrl + B
+      if ((e.metaKey || e.ctrlKey) && e.key === "b") {
+        e.preventDefault();
+        // Toggle sidebar - this would need to be implemented in the actual sidebar component
+        console.log("Toggle sidebar with keyboard shortcut");
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [enableKeyboardShortcuts]);
+
+  // Apply store settings to sidebar - remove defaultOpen from here
+  // const sidebarProps = {
+  //   ...props,
+  //   side: sidebarPosition,
+  //   variant: sidebarVariant,
+  //   collapsible: collapseBehavior,
+  //   // Remove defaultOpen from here
+  //   style: { width: sidebarWidth },
+  // };
 
   // Apply store settings to sidebar
   const sidebarProps = {
@@ -173,8 +230,41 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     side: sidebarPosition,
     variant: sidebarVariant,
     collapsible: collapseBehavior,
+    className: `${props.className || ""} sidebar-custom`,
   };
 
+  // Create a style tag to handle the width properly
+  useEffect(() => {
+    if (!isMounted) return;
+
+    // Create a style element
+    const styleEl = document.createElement("style");
+    styleEl.setAttribute("id", "sidebar-custom-styles");
+
+    // Set the CSS
+    styleEl.textContent = `
+      .sidebar-custom {
+        --sidebar-width: ${sidebarWidth};
+        --sidebar-width-collapsed: ${sidebarMobileWidth};
+      }
+    `;
+
+    // Remove any existing style element
+    const existingStyle = document.getElementById("sidebar-custom-styles");
+    if (existingStyle) {
+      existingStyle.remove();
+    }
+
+    // Add the style element to the head
+    document.head.appendChild(styleEl);
+
+    return () => {
+      // Clean up
+      styleEl.remove();
+    };
+  }, [isMounted, sidebarWidth, sidebarMobileWidth]);
+
+  // The SidebarProvider is already in the parent component, so we don't need it here
   return (
     <Sidebar {...sidebarProps}>
       {showHeader && (
@@ -183,8 +273,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarHeader>
       )}
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
+        <NavMain
+          items={data.navMain}
+          showIcons={showIcons}
+          showSectionLabels={showSectionLabels}
+          buttonSize={menuButtonSize}
+        />
+        <NavProjects
+          projects={data.projects}
+          showIcons={showIcons}
+          showSectionLabels={showSectionLabels}
+          buttonSize={menuButtonSize}
+        />
       </SidebarContent>
       {showFooter && (
         <SidebarFooter>

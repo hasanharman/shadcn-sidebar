@@ -128,28 +128,23 @@
   }
 }
 
-/* sidebar-override.css */
-.sidebar-builder-container {
-  position: relative;
-  height: 100%;
-  overflow: hidden;
+/* In your globals.css file */
+:root {
+  --sidebar-width: 16rem;
+  --sidebar-width-collapsed: 4rem;
 }
 
-.sidebar-builder-container [data-slot="sidebar-wrapper"] {
-  min-height: 100% !important;
-  height: 100% !important;
+/* Override the default sidebar width with our custom variables */
+[data-sidebar-main] {
+  width: var(--sidebar-width) !important;
+  transition: width 0.3s ease;
 }
 
-.sidebar-builder-container [data-slot="sidebar"] {
-  position: absolute !important;
-  top: 0 !important;
-  bottom: 0 !important;
-  height: 100% !important;
-  max-height: 100% !important;
-  min-height: 100% !important;
+[data-sidebar-main][data-state="closed"] {
+  width: var(--sidebar-width-collapsed) !important;
 }
 
-.sidebar-builder-container [data-slot="sidebar-inset"] {
-  min-height: 100% !important;
-  height: 100% !important;
+/* For icon-only mode */
+[data-sidebar-main][data-collapsible="icon"][data-state="closed"] {
+  width: var(--sidebar-width-collapsed) !important;
 }

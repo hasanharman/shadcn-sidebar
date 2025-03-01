@@ -1,14 +1,13 @@
 // components/nav-main.tsx
-"use client";
+"use client"
 
-import { ChevronRight, type LucideIcon } from "lucide-react";
-import { useBuilderStore } from "@/store/use-builder-store";
+import { ChevronRight, type LucideIcon } from "lucide-react"
 
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+} from "@/components/ui/collapsible"
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -18,27 +17,33 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-} from "@/components/ui/sidebar";
+} from "@/components/ui/sidebar"
 
 interface NavMainProps {
   items: {
-    title: string;
-    url: string;
-    icon?: LucideIcon;
-    isActive?: boolean;
+    title: string
+    url: string
+    icon?: LucideIcon
+    isActive?: boolean
     items?: {
-      title: string;
-      url: string;
-    }[];
-  }[];
+      title: string
+      url: string
+    }[]
+  }[]
+  showIcons?: boolean
+  showSectionLabels?: boolean
+  buttonSize?: "default" | "sm" | "lg"
 }
 
-export function NavMain({ items }: NavMainProps) {
-  const { showIcons } = useBuilderStore();
-
+export function NavMain({ 
+  items, 
+  showIcons = true, 
+  showSectionLabels = true,
+  buttonSize = "default"
+}: NavMainProps) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      {showSectionLabels && <SidebarGroupLabel>Platform</SidebarGroupLabel>}
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible
@@ -49,7 +54,7 @@ export function NavMain({ items }: NavMainProps) {
           >
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton tooltip={item.title}>
+                <SidebarMenuButton tooltip={item.title} size={buttonSize}>
                   {showIcons && item.icon && <item.icon />}
                   <span>{item.title}</span>
                   <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
@@ -73,5 +78,5 @@ export function NavMain({ items }: NavMainProps) {
         ))}
       </SidebarMenu>
     </SidebarGroup>
-  );
+  )
 }

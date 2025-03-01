@@ -8,7 +8,6 @@ import {
   Trash2,
   type LucideIcon,
 } from "lucide-react";
-import { useBuilderStore } from "@/store/use-builder-store";
 
 import {
   DropdownMenu,
@@ -33,19 +32,26 @@ interface NavProjectsProps {
     url: string;
     icon: LucideIcon;
   }[];
+  showIcons?: boolean;
+  showSectionLabels?: boolean;
+  buttonSize?: "default" | "sm" | "lg";
 }
 
-export function NavProjects({ projects }: NavProjectsProps) {
+export function NavProjects({
+  projects,
+  showIcons = true,
+  showSectionLabels = true,
+  buttonSize = "default",
+}: NavProjectsProps) {
   const { isMobile } = useSidebar();
-  const { showIcons } = useBuilderStore();
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>Projects</SidebarGroupLabel>
+      {showSectionLabels && <SidebarGroupLabel>Projects</SidebarGroupLabel>}
       <SidebarMenu>
         {projects.map((item) => (
           <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton asChild>
+            <SidebarMenuButton asChild size={buttonSize}>
               <a href={item.url}>
                 {showIcons && <item.icon />}
                 <span>{item.name}</span>
@@ -81,7 +87,10 @@ export function NavProjects({ projects }: NavProjectsProps) {
           </SidebarMenuItem>
         ))}
         <SidebarMenuItem>
-          <SidebarMenuButton className="text-sidebar-foreground/70">
+          <SidebarMenuButton
+            className="text-sidebar-foreground/70"
+            size={buttonSize}
+          >
             {showIcons && (
               <MoreHorizontal className="text-sidebar-foreground/70" />
             )}
