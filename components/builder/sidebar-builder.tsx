@@ -19,7 +19,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { useBuilderStore } from "@/store/use-builder-store";
 
 export function SidebarBuilder() {
-  const { activeTab, setActiveTab } = useBuilderStore();
+  const { activeTab } = useBuilderStore();
 
   return (
     <div className="h-full flex flex-col">
