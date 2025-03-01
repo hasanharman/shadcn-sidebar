@@ -29,6 +29,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { useBuilderStore } from "@/store/use-builder-store";
+import { useSidebarContentStore } from "@/store/use-content-store";
 
 // This is sample data.
 const data = {
@@ -183,6 +184,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     // Style Settings
     menuButtonSize,
   } = useBuilderStore();
+  const { user, teams, navMain, projects } = useSidebarContentStore();
 
   // Check if we're on mobile
   useEffect(() => {
@@ -213,16 +215,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [enableKeyboardShortcuts]);
-
-  // Apply store settings to sidebar - remove defaultOpen from here
-  // const sidebarProps = {
-  //   ...props,
-  //   side: sidebarPosition,
-  //   variant: sidebarVariant,
-  //   collapsible: collapseBehavior,
-  //   // Remove defaultOpen from here
-  //   style: { width: sidebarWidth },
-  // };
 
   // Apply store settings to sidebar
   const sidebarProps = {
@@ -269,18 +261,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar {...sidebarProps}>
       {showHeader && (
         <SidebarHeader>
-          <TeamSwitcher teams={data.teams} />
+          <TeamSwitcher teams={teams} />
         </SidebarHeader>
       )}
       <SidebarContent>
         <NavMain
-          items={data.navMain}
+          items={navMain}
           showIcons={showIcons}
           showSectionLabels={showSectionLabels}
           buttonSize={menuButtonSize}
         />
         <NavProjects
-          projects={data.projects}
+          projects={projects}
           showIcons={showIcons}
           showSectionLabels={showSectionLabels}
           buttonSize={menuButtonSize}
@@ -288,7 +280,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
       {showFooter && (
         <SidebarFooter>
-          <NavUser user={data.user} />
+          <NavUser user={user} />
         </SidebarFooter>
       )}
       <SidebarRail />

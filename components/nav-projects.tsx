@@ -1,13 +1,7 @@
 // components/nav-projects.tsx
 "use client";
 
-import {
-  Folder,
-  Forward,
-  MoreHorizontal,
-  Trash2,
-  type LucideIcon,
-} from "lucide-react";
+import { Folder, Forward, MoreHorizontal, Trash2 } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -25,12 +19,13 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { IconRenderer } from "./builder/icon-renderer";
 
 interface NavProjectsProps {
   projects: {
     name: string;
     url: string;
-    icon: LucideIcon;
+    iconName: string;
   }[];
   showIcons?: boolean;
   showSectionLabels?: boolean;
@@ -53,7 +48,7 @@ export function NavProjects({
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild size={buttonSize}>
               <a href={item.url}>
-                {showIcons && <item.icon />}
+                {showIcons && <IconRenderer name={item.iconName} />}
                 <span>{item.name}</span>
               </a>
             </SidebarMenuButton>

@@ -8,6 +8,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { SidebarSettingsDialog } from "@/components/builder/sidebar-settings-dialog";
+import { SidebarContentDialog } from "@/components/builder/sidebar-content-dialog";
 
 export default function BuilderToolbar() {
   const { activeTab, setActiveTab } = useBuilderStore();
@@ -33,6 +34,7 @@ export default function BuilderToolbar() {
         <span className="ml-4">Shadcn Sidebar</span>
       </div>
       <div className="flex items-center gap-2 ml-auto">
+        <SidebarContentDialog />
         <SidebarSettingsDialog />
         <Button variant="outline">npx shadcn add (todo)</Button>
         <Button className="bg-black text-white rounded-md">

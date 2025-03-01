@@ -1,13 +1,14 @@
 // components/nav-main.tsx
-"use client"
+"use client";
 
-import { ChevronRight, type LucideIcon } from "lucide-react"
+import { ChevronRight, type LucideIcon } from "lucide-react";
 
+import { IconRenderer } from "@/components/builder/icon-renderer";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible"
+} from "@/components/ui/collapsible";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -17,29 +18,29 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
 interface NavMainProps {
   items: {
-    title: string
-    url: string
-    icon?: LucideIcon
-    isActive?: boolean
+    title: string;
+    url: string;
+    iconName: string; // Changed from icon to iconName
+    isActive?: boolean;
     items?: {
-      title: string
-      url: string
-    }[]
-  }[]
-  showIcons?: boolean
-  showSectionLabels?: boolean
-  buttonSize?: "default" | "sm" | "lg"
+      title: string;
+      url: string;
+    }[];
+  }[];
+  showIcons?: boolean;
+  showSectionLabels?: boolean;
+  buttonSize?: "default" | "sm" | "lg";
 }
 
-export function NavMain({ 
-  items, 
-  showIcons = true, 
+export function NavMain({
+  items,
+  showIcons = true,
   showSectionLabels = true,
-  buttonSize = "default"
+  buttonSize = "default",
 }: NavMainProps) {
   return (
     <SidebarGroup>
@@ -55,7 +56,9 @@ export function NavMain({
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
                 <SidebarMenuButton tooltip={item.title} size={buttonSize}>
-                  {showIcons && item.icon && <item.icon />}
+                  {showIcons && item.iconName && (
+                    <IconRenderer name={item.iconName} />
+                  )}
                   <span>{item.title}</span>
                   <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                 </SidebarMenuButton>
@@ -78,5 +81,5 @@ export function NavMain({
         ))}
       </SidebarMenu>
     </SidebarGroup>
-  )
+  );
 }
